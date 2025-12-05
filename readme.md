@@ -1,307 +1,308 @@
-"""
----------------------------------------------------------------
-PROJECT SUMMARY – DEFECT PREDICTION & RISK ANALYSIS PIPELINE
----------------------------------------------------------------
+# 📘 **PROJECT SUMMARY — DEFECT PREDICTION & RISK ANALYSIS PIPELINE**
 
 This project focuses on:
-1. Defect Prediction – identifying fault-prone modules using
-   code metrics, process metrics, and change history.
-2. Early Detection of High-Risk Components – automatically
-   flagging commits/files likely to introduce bugs.
 
-The project has two major components:
+1. **Defect Prediction** – identifying fault-prone modules using code metrics, process metrics, and historical change data.
+2. **Early Detection of High-Risk Components** – automatically flagging commits/files that are likely to introduce bugs.
 
-================================================================
-1) MACHINE LEARNING DEFECT PREDICTION (PROMISE DATASETS)
-================================================================
-- Multiple PROMISE defect datasets (jm1, kc1, kc2, cm1, pc1)
-  are downloaded automatically.
-- A processing pipeline prepares the data:
-        • detects defect label
-        • keeps only relevant numeric metrics
-        • handles missing values
-        • applies scaling
-        • applies SMOTE for imbalance (when available)
+The system contains **two analytical engines** and a **risk-scoring layer**, forming a complete defect-prediction pipeline.
 
-- Models used:
-        • Logistic Regression
-        • Decision Tree
-        • Random Forest
-        • SVM
-        • (optionally) XGBoost
+---
 
-- For each dataset and each model, the script generates:
-        • accuracy, precision, recall, F1
-        • ROC-AUC score
-        • confusion matrix (displayed inline)
-        • ROC curve (displayed inline)
-        • Precision-Recall curve
-        • Classification report
-        • Aggregated comparison bar charts
+# **1. MACHINE LEARNING DEFECT PREDICTION (PROMISE DATASETS)**
 
-- A final comparison table is created showing
-  which model performs best per dataset.
+### ✔️ Datasets
 
-This part demonstrates how ML models trained on historical
-software metrics can predict which modules are likely to be defective.
+Multiple PROMISE datasets are automatically downloaded: **jm1, kc1, kc2, cm1, pc1**.
 
-================================================================
-2) CHANGE-HISTORY MINING USING PYDRILLER (REPO ANALYSIS)
-================================================================
-- The user inputs ANY GitHub repo URL.
-- PyDriller mines the entire commit history and extracts
-  real engineering metrics per commit:
-        • total added lines
-        • total deleted lines
-        • churn per commit
-        • cyclomatic complexity of changed files
-        • number of methods changed
-        • files modified count
-        • developer experience (number of prior commits)
-        • commit message length
-        • commit timestamp
+### ✔️ Data Processing Pipeline
 
-- All commits (not just top 5) are shown in a clean table.
-- A CSV file (commit_metrics.csv) is generated for reuse.
+* Detects defect label
+* Selects numeric feature columns
+* Handles missing values
+* Scales features
+* Balances classes using **SMOTE**
 
-This part captures important *process metrics* proven in
-research to correlate with bugs.
+### ✔️ ML Models Used
 
-================================================================
-3) RISK SCORING & COMMIT-LEVEL DEFECT LIKELIHOOD
-================================================================
-- A custom evaluator computes a “risk score” for every commit.
-- It normalizes and combines metrics like:
-      • churn score
-      • complexity score
-      • files modified score
-      • developer experience score
-      • commit message score
+* Logistic Regression
+* Decision Tree
+* Random Forest
+* SVM
+* (Optional) XGBoost
 
-- Weighted mathematically into a final RISK SCORE (0–1).
-- Each commit is automatically classified as:
-      LOW RISK (safe)
-      MEDIUM RISK (needs review)
-      HIGH RISK (likely fault-prone)
+### ✔️ For each dataset + model, the script produces:
 
-- Inline visualizations include:
-      • distribution of risk scores
-      • pie chart of risk categories
-      • bar chart of top risky commits
+* Accuracy, Precision, Recall, F1
+* ROC-AUC
+* Confusion Matrix
+* ROC curve
+* Precision-Recall curve
+* Classification report
+* Dataset-level comparison charts
 
-- A final repository-level summary is generated:
-      • % HIGH, MEDIUM, LOW risk commits
-      • top risky commits
-      • interpretation of overall safety
+A **final comparison table** identifies the best model per dataset.
 
-This part provides EARLY DETECTION of risky changes,
-meeting the second objective of the project.
+**Purpose:** Demonstrates how ML models can predict defect-prone modules based on historical metrics.
 
-================================================================
-OVERALL CONTRIBUTION
-================================================================
-Through the combination of:
-    • static code metrics (PROMISE datasets),
-    • process metrics (PyDriller computed),
-    • ML defect prediction,
-    • commit-level risk scoring,
-the pipeline forms a complete, modern defect prediction system.
+---
 
-It identifies:
-    - which modules/datasets are fault-prone (ML models)
-    - which commits in a live repository introduce risk
-    - where developers should focus testing and review efforts.
+# **2. CHANGE-HISTORY MINING WITH PYDRILLER (REPOSITORY ANALYSIS)**
 
-This satisfies the project topic:
-“Defect Prediction – Predicting fault-prone modules using code
-metrics, process metrics, and change history. Early detection
-of high-risk components.”
+### ✔️ User Input
 
----------------------------------------------------------------
-"""
+The user provides **any GitHub repository URL**.
 
+### ✔️ Metrics Extracted Per Commit
 
+* Added/deleted lines
+* Code churn
+* Cyclomatic complexity of modified files
+* Number of methods changed
+* Files modified
+* Developer experience
+* Commit message length
+* Timestamp
 
+### ✔️ Output
 
-"""
-================================================================
-HOW CRISP-DM IS APPLIED IN THIS DEFECT PREDICTION PROJECT
-================================================================
+* A full commit-level table
+* Exported **commit_metrics.csv**
 
-This project follows the CRISP-DM (Cross-Industry Standard Process
-for Data Mining) methodology. Below is how each phase is addressed:
+**Purpose:** Extracts real-world *process metrics* known to correlate with software defects.
 
-----------------------------------------------------------------
-1) BUSINESS UNDERSTANDING
-----------------------------------------------------------------
-Goal:
-    • Predict defect-prone modules and high-risk commits.
-    • Help developers detect risky code changes early.
-    • Reduce bugs by focusing reviews/testing on fault-prone areas.
+---
 
-Questions answered:
-    • Which components are most likely to generate defects?
-    • Which commits introduce risk?
-    • Which ML models perform best for defect prediction?
+# **3. RISK SCORING & COMMIT-LEVEL DEFECT LIKELIHOOD**
 
-----------------------------------------------------------------
-2) DATA UNDERSTANDING
-----------------------------------------------------------------
-Two types of data are used:
+A custom evaluator computes a **risk score (0–1)** for every commit.
 
-A) Static Code Metrics (PROMISE datasets)
-    - Metrics such as LOC, complexity, coupling, etc.
-    - Past version-level defect labels.
+### ✔️ Components of the Risk Score
 
-B) Process & Change Metrics (PyDriller repository mining)
-    - Commit history, churn, file changes, complexity per change,
-      developer experience, message length.
-    - Gives “behavioral” signals of risky changes.
+* Churn score
+* Complexity score
+* Files modified score
+* Developer experience score
+* Commit message score
 
-Actions taken:
-    • Explored dataset shapes.
-    • Identified defect label.
-    • Inspected commit-level metrics from GitHub repo.
-    • Visualized and printed dataset samples.
+### ✔️ Commit Classification
 
-----------------------------------------------------------------
-3) DATA PREPARATION
-----------------------------------------------------------------
-Steps applied to PROMISE datasets:
-    • Automatic label detection.
-    • Removal of non-numeric attributes.
-    • Handling missing values using median imputation.
-    • Feature scaling using StandardScaler.
-    • Applying SMOTE to balance imbalanced defect classes.
-    • Dropped constant/irrelevant features.
+* **LOW RISK** – safe
+* **MEDIUM RISK** – requires review
+* **HIGH RISK** – likely fault-prone
 
-Steps applied to repository data:
-    • Extracted metrics across all commits.
-    • Normalized churn, complexity, experience, etc.
-    • Created combined risk features from change history.
+### ✔️ Visualizations
 
-----------------------------------------------------------------
-4) MODELING
-----------------------------------------------------------------
-ML models trained on PROMISE datasets:
-    • Logistic Regression
-    • Decision Tree
-    • Random Forest
-    • SVM
-    • XGBoost (optional)
+* Distribution of risk scores
+* Pie chart of risk classes
+* “Top risky commits” bar chart
 
-For each model:
-    • Train/test split with stratification.
-    • Fit on scaled + balanced features.
-    • Predictions generated for defect probability.
+### ✔️ Repository Summary
 
-Heuristic risk scoring for commit-level history:
-    • Weighted combination of churn, complexity, file changes,
-      experience and message length.
-    • Produces risk_score ∈ [0,1] for each commit.
-    • Classifies commits into LOW, MEDIUM, HIGH risk.
+* Percentage of LOW/MEDIUM/HIGH risk commits
+* Highest-risk commits listed
+* Overall safety interpretation
 
-----------------------------------------------------------------
-5) EVALUATION
-----------------------------------------------------------------
-Metrics used for ML models:
-    • Accuracy
-    • Precision
-    • Recall
-    • F1-score
-    • ROC-AUC
-    • Confusion matrices
+---
 
-For repository risk scoring:
-    • Visualization of risk score distribution.
-    • Percentage of HIGH/MEDIUM/LOW risk commits.
-    • Top risky commits listed for developer priority.
-    • Overall repository safety conclusion.
+# **OVERALL CONTRIBUTION**
 
-All results shown inside Google Colab (graphs inline).
+By combining:
 
-----------------------------------------------------------------
-6) DEPLOYMENT (Project-Level Deployment Interpretation)
-----------------------------------------------------------------
-While not deployed as a live system, the pipeline supports:
-    • Re-running on any GitHub repo via input().
-    • Auto-generation of risk reports.
-    • Model comparison and best-model identification.
-    • Continuous defect prediction capability for any codebase.
+* Static code metrics (PROMISE)
+* Process metrics (PyDriller)
+* ML classification models
+* Commit-level risk scoring
 
-In future:
-    • Integrate into CI/CD pipelines.
-    • Use trained models to score incoming pull requests.
+…the pipeline delivers a **modern, end-to-end defect prediction system** capable of:
 
-================================================================
-CRISP-DM SUMMARY
-================================================================
-CRISP-DM is fully implemented:
-    • Business Understanding → Defect prediction + risk analysis
-    • Data Understanding → PROMISE metrics + PyDriller history
-    • Data Preparation → Cleaning, scaling, feature engineering
-    • Modeling → Multiple ML models + heuristic risk scoring
-    • Evaluation → Visual metrics + repo-level risk summary
-    • Deployment → Reusable pipeline for any repository
+* Identifying fault-prone modules
+* Detecting risky commits early
+* Guiding developers toward targeted reviews and testing
 
-This demonstrates a complete predictive analytics workflow
-for real-world defect prediction in software engineering.
-================================================================
+---
 
+# 📘 **CRISP–DM APPLICATION IN THIS PROJECT**
 
+Below is how the entire pipeline aligns with the **CRISP-DM framework**.
 
+---
 
-                            CRISP–DM for Defect Prediction Project
-================================================================================
+## **1. BUSINESS UNDERSTANDING**
 
-                ┌──────────────────────────────────────────────────────┐
-                │ 1. BUSINESS UNDERSTANDING                            │
-                │ - Predict defect-prone modules                       │
-                │ - Early detection of risky commits                   │
-                │ - Improve software reliability                       │
-                └──────────────┬───────────────────────────────────────┘
-                               │
-                               ▼
-                ┌──────────────────────────────────────────────────────┐
-                │ 2. DATA UNDERSTANDING                                │
-                │ - PROMISE datasets (static code metrics)             │
-                │ - PyDriller commit history (process metrics)         │
-                │ - Explore dataset shapes & commit patterns           │
-                └──────────────┬───────────────────────────────────────┘
-                               │
-                               ▼
-                ┌──────────────────────────────────────────────────────┐
-                │ 3. DATA PREPARATION                                  │
-                │ - Cleaning, imputation, scaling                      │
-                │ - SMOTE for imbalance                                │
-                │ - Extract churn, complexity, experience              │
-                │ - Normalize metrics for risk scoring                 │
-                └──────────────┬───────────────────────────────────────┘
-                               │
-                               ▼
-                ┌──────────────────────────────────────────────────────┐
-                │ 4. MODELING                                          │
-                │ - ML Models: LR, DT, RF, SVM, XGB                    │
-                │ - Commit risk scoring model (heuristic)              │
-                │ - Classification: LOW / MEDIUM / HIGH risk           │
-                └──────────────┬───────────────────────────────────────┘
-                               │
-                               ▼
-                ┌──────────────────────────────────────────────────────┐
-                │ 5. EVALUATION                                        │
-                │ - Accuracy, Precision, Recall, F1, AUC               │
-                │ - Confusion Matrix, ROC/PR curves                    │
-                │ - Repo-level risk summary                            │
-                └──────────────┬───────────────────────────────────────┘
-                               │
-                               ▼
-                ┌──────────────────────────────────────────────────────┐
-                │ 6. DEPLOYMENT                                        │
-                │ - Reusable pipeline                                  │
-                │ - Risk scoring for ANY GitHub repository             │
-                │ - Ready for CI/CD integration                        │
-                └──────────────────────────────────────────────────────┘
+**Goals:**
 
-================================================================================
+* Predict defect-prone code modules
+* Detect risky commits early
+* Improve code review prioritization and reliability
 
-"""
+**Questions Answered:**
+
+* Which components are likely to contain defects?
+* Which commits introduce the most risk?
+* Which ML models work best?
+
+---
+
+## **2. DATA UNDERSTANDING**
+
+### A) PROMISE Datasets – *Static Code Metrics*
+
+* LOC
+* Complexity
+* Coupling
+* Defect labels
+
+### B) PyDriller Repo History – *Process Metrics*
+
+* Churn
+* Complexity of changed files
+* Commit experience
+* Message quality
+* Time-based features
+
+**Activities:**
+
+* Explored dataset structures
+* Inspected commit-level metrics
+* Displayed samples and visualizations
+
+---
+
+## **3. DATA PREPARATION**
+
+### ✔️ For PROMISE Data
+
+* Automatic defect label detection
+* Cleaning + imputation
+* Scaling
+* SMOTE balancing
+* Removing non-numeric and constant features
+
+### ✔️ For Repository Data
+
+* Extracting commit metrics
+* Normalizing numeric metrics
+* Engineering combined “risk” features
+
+---
+
+## **4. MODELING**
+
+### ML Models Trained
+
+* Logistic Regression
+* Decision Tree
+* Random Forest
+* SVM
+* XGBoost (optional)
+
+**Process:**
+
+* Stratified train/test split
+* Fitting on preprocessed data
+* Predicting defect probabilities
+
+### Commit-Level Modeling
+
+* Heuristic risk scoring
+* Produces **risk_score ∈ [0,1]**
+* Classifies into **Low/Medium/High risk**
+
+---
+
+## **5. EVALUATION**
+
+### For ML Models
+
+* Accuracy
+* Precision / Recall / F1
+* ROC-AUC
+* Confusion Matrix
+* ROC + PR curves
+
+### For Repo Risk Scoring
+
+* Visual risk distribution
+* Risk category percentages
+* List of highest-risk commits
+* Final repository safety assessment
+
+---
+
+## **6. DEPLOYMENT (Project-Level)**
+
+Although not deployed as a service, the system supports:
+
+* Running on **any GitHub repo** on demand
+* Auto-generated risk reports
+* Reusable architecture for continuous scoring
+* CI/CD integration potential
+
+**Future Enhancements:**
+
+* Automatic pull-request scoring
+* Integration with GitHub Actions or Jenkins
+* Persistent model deployment
+
+---
+
+# **CRISP–DM SUMMARY TABLE**
+
+| Phase                      | What Was Done                                     |
+| -------------------------- | ------------------------------------------------- |
+| **Business Understanding** | Defect prediction + early risk detection          |
+| **Data Understanding**     | PROMISE static metrics + PyDriller change history |
+| **Data Preparation**       | Cleaning, balancing, scaling, feature engineering |
+| **Modeling**               | ML models + commit risk scoring                   |
+| **Evaluation**             | ML metrics, visualizations, repo risk summary     |
+| **Deployment**             | Reusable pipeline, CI/CD-ready                    |
+
+---
+
+# **CRISP–DM DIAGRAM (Reformatted)**
+
+```
+┌───────────────────────────────────────────┐
+│ 1. BUSINESS UNDERSTANDING                 │
+│ - Predict defect-prone modules            │
+│ - Detect risky commits early              │
+│ - Improve software reliability            │
+└───────────────────────┬──────────────────┘
+                        │
+                        ▼
+┌───────────────────────────────────────────┐
+│ 2. DATA UNDERSTANDING                     │
+│ - PROMISE datasets (static metrics)       │
+│ - PyDriller commit history (process data) │
+└───────────────────────┬──────────────────┘
+                        │
+                        ▼
+┌───────────────────────────────────────────┐
+│ 3. DATA PREPARATION                       │
+│ - Cleaning, scaling, imputation           │
+│ - SMOTE balancing                         │
+│ - Commit metric extraction & normalization│
+└───────────────────────┬──────────────────┘
+                        │
+                        ▼
+┌───────────────────────────────────────────┐
+│ 4. MODELING                               │
+│ - ML models: LR, DT, RF, SVM, XGB         │
+│ - Commit risk scoring                     │
+└───────────────────────┬──────────────────┘
+                        │
+                        ▼
+┌───────────────────────────────────────────┐
+│ 5. EVALUATION                             │
+│ - Accuracy, F1, AUC, Confusion Matrix     │
+│ - Repo risk summary                       │
+└───────────────────────┬──────────────────┘
+                        │
+                        ▼
+┌───────────────────────────────────────────┐
+│ 6. DEPLOYMENT                             │
+│ - Reusable pipeline                       │
+│ - Ready for CI/CD integration             │
+└───────────────────────────────────────────┘
+```
